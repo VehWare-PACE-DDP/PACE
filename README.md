@@ -1,6 +1,6 @@
 # PACE   
 
-Requires Python3.7 and Pygame     
+Requires Python3.7, Pygame, matplotlib, pandas    
 
 opto.py:    
   -goal to simulate optokinetic tape movement   
