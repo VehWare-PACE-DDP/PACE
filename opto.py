@@ -1,6 +1,11 @@
 import time
 import sys
 import pygame
+import pandas as pd
+import csv
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 
 
 red = (255,0,0)
@@ -54,12 +59,17 @@ screen.blit(surf, (350, 75))
 
 blockFile = open("blockPos.txt", "w")
 eyeFile = open("eyePos.txt", "w")
+dfBlock=pd.DataFrame()
+dfEye=pd.DataFrame() 
+
 
 
 running = True
 speed = 5
 runs = 0
 forward = 1
+rowNum = 1
+start_time = time.time()
 while running:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -80,7 +90,7 @@ while running:
 	for block in blockList:
 		pygame.draw.rect(screen, block.color, (block.xCoord, 100, 100, 100))
 
-		if block.xCoord > 250 and block.xCoord < 650 and block.color == red:
+		if block.xCoord > 350 and block.xCoord < 650 and block.color == red:
 			tempBlock = block
 
 		block.xCoord += speed
@@ -93,19 +103,72 @@ while running:
         #sleep needed to fine tune speed depending on system
 	time.sleep(.005)
 	pygame.display.update()
-	mouseX,mouseY = pygame.mouse.get_pos()
-	updateTime = time.perf_counter_ns()
+	
+	#updateTime = time.time()
 
 
 	blockFile.write("Block in Focus Zone at Coords:\n")
-	if tempBlock.xCoord  < 350:
-		blockFile.write("%i %s %i %s %i\n" % (350, "to", (tempBlock.xCoord+100), "at time:", updateTime))
-	elif tempBlock.xCoord > 550:
-		blockFile.write("%i %s %i %s %i\n" % (tempBlock.xCoord, "to", 650, "at time:", updateTime))
+	#if tempBlock.xCoord  < 350:
+	if tempBlock.xCoord > 350 and tempBlock.xCoord < 650:
+		#blockFile.write("%i %s %i %s %i\n" % (tempBlock.xCoord, "to", (tempBlock.xCoord+100), "at time:", (time.time() - start_time)))
+		dfBlock.at[rowNum, 'X coordinate'] = tempBlock.xCoord
+		dfBlock.at[rowNum, 'Y coordinate'] = tempBlock.xCoord+100
+		dfBlock.at[rowNum, 'Time'] = (time.time() - start_time)
+		
+	mouseX,mouseY = pygame.mouse.get_pos()
+	#eyeFile.write("%i%s%i %s %i\n" % (mouseX, ",", mouseY, "at time:", (time.time() - start_time)))
+	dfEye.at[rowNum, 'X coordinate'] = mouseX
+	dfEye.at[rowNum, 'Y coordinate'] = mouseY
+		
+	if (mouseX in range(350,651)):
+		dfEye.at[rowNum, 'Bool'] = 1
 	else:
-		blockFile.write("%i %s %i %s %i\n" % (tempBlock.xCoord, "to", (tempBlock.xCoord+100), "at time:", updateTime))
+		dfEye.at[rowNum, 'Bool'] = 0
 
-	eyeFile.write("%i%s%i %s %i\n" % (mouseX, ",", mouseY, "at time:", updateTime))
-	print(mouseX,mouseY)
+	dfEye.at[rowNum, 'Time'] = (time.time() - start_time)
+		#print(mouseX,mouseY)
+
+	#elif tempBlock.xCoord > 550:
+		#blockFile.write("%i %s %i %s %i\n" % (tempBlock.xCoord, "to", 650, "at time:", (time.time() - start_time)))
+		#dfBlock.at[rowNum, 'X coordinate'] = tempBlock.xCoord
+		#dfBlock.at[rowNum, 'Y coordinate'] = tempBlock.xCoord+100
+		#dfBlock.at[rowNum, 'Time'] = (time.time() - start_time)
+	#else:
+		#blockFile.write("%i %s %i %s %i\n" % (tempBlock.xCoord, "to", (tempBlock.xCoord+100), "at time:", (time.time() - start_time)))
+		#dfBlock.at[rowNum, 'X coordinate'] = tempBlock.xCoord
+		#dfBlock.at[rowNum, 'Y coordinate'] = tempBlock.xCoord+100
+		#dfBlock.at[rowNum, 'Time'] = (time.time() - start_time)
+
 
 	runs += 1
+	rowNum +=1
+
+print()
+#print('Block dataframe results:')
+#print(dfBlock)
+print()
+#print('Eye position dataframe results:')
+#print(dfEye)
+
+dfBlock.to_csv('Block_Log.csv', encoding='utf-8')
+dfEye.to_csv('Cursor_Log.csv', encoding='utf-8')
+
+
+
+#plt.plot(dfEye.loc[:, 'Time'], dfEye.loc[:, 'Bool'], marker='*',linestyle='-',label='Test Results')
+#plt.xlabel = 'Time'
+#plt.ylabel = 'Accuracy'
+#plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
