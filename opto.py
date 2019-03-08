@@ -1,9 +1,11 @@
+import soundRandom
 import time
 import sys
 import pygame
 import pandas as pd
 import csv
 import matplotlib
+import threading
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
@@ -70,7 +72,16 @@ runs = 0
 forward = 1
 rowNum = 1
 start_time = time.time()
+
+soundObj = soundRandom.soundRandom()
+t1 = threading.Thread(target=soundObj.randSound) # Function name without paranthesis, with paranthesis you CALL it and it gets block.
+t1.setDaemon(True)
+t1.start()
+
 while running:
+
+	
+
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			running = False
